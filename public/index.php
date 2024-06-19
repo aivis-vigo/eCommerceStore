@@ -4,9 +4,8 @@
 
 require_once "../vendor/autoload.php";
 
+use App\Factories\FactoryManager;
 use App\Models\Categories\Section;
-use App\Models\Factories\FashionProductFactory;
-use App\Models\Factories\TechProductFactory;
 
 $path = __DIR__ . "/../data/data.json";
 $data = file_get_contents($path);
@@ -21,27 +20,29 @@ foreach ($categories as $category) {
     $sections[] = $section;
 }
 
+$allProducts = $decoded->data->products;
+
 
 $devices = [];
 $clothing = [];
 
-$tech = $decoded->data->products;
-$techCreator = new TechProductFactory();
-$fashionCreator = new FashionProductFactory();
+$factoryManager = new FactoryManager();
 
-foreach ($tech as $product) {
+foreach ($allProducts as $product) {
+    $factory = $factoryManager->getFactory($product->category);
+    $item = $factory->createProduct($product);
+
     if ($product->category == "tech") {
-        $device = $techCreator->createProduct($product);
-
-        $devices[] = $device;
+        $devices[] = $item;
     } else {
-        $apparel = $fashionCreator->createProduct($product);
-
-        $clothing[] = $apparel;
+        $clothing[] = $item;
     }
 }
 
-echo "<pre>";
+/*echo "<pre>";
 var_dump($clothing);
 var_dump($devices);
-echo "<pre>";
+echo "<pre>";*/
+
+$techController = new \App\Controllers\TechController();
+echo $techController->index();
