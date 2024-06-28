@@ -1,0 +1,109 @@
+<?php declare(strict_types=1);
+
+namespace App\Repository\Attribute;
+
+use App\Database\Database;
+use Doctrine\DBAL\Query\QueryBuilder;
+
+// todo: CRUD operations
+
+class AttributeOptionRepository
+{
+    private Database $db;
+    private QueryBuilder $queryBuilder;
+
+    public function __construct(Database $db)
+    {
+        $this->db = $db;
+        $this->queryBuilder = $this->db->createQueryBuilder();
+    }
+
+    public function insertOne(array $types): void
+    {
+        if ($types) {
+            foreach ($types as $type) {
+                $options = $type->getOptions();
+                $className = $this->getClassName($type);
+                $typeId = $this->getAttributeTypeId($className);
+
+                foreach ($options as $option) {
+                    $value = $option->getValue();
+
+                    if (!$this->checkIfExists($typeId, $value)) {
+                        $optionId = $this->getAttributeOptionId();
+                        $value = $option->getValue();
+
+                        $this->db->createQueryBuilder()
+                            ->insert('attribute_option')
+                            ->values([
+                                'attribute_option_id' => ':attribute_option_id',
+                                'attribute_type_id' => ':attribute_type_id',
+                                'attribute_option_value' => ':attribute_option_value'
+                            ])
+                            ->setParameters([
+                                ':attribute_option_id' => $optionId,
+                                ':attribute_type_id' => $typeId,
+                                ':attribute_option_value' => $value
+                            ])
+                            ->executeStatement();
+                    }
+                }
+            }
+        }
+    }
+
+    public function checkIfExists(int $typeId, string $value): bool
+    {
+        $option = $this->db->createQueryBuilder()
+            ->select('attribute_option_id')
+            ->from('attribute_option')
+            ->where('attribute_type_id = :attribute_type_id')
+            ->andWhere('attribute_option_value = :value')
+            ->setParameters([
+                ':attribute_type_id' => $typeId,
+                ':value' => $value
+            ])
+            ->executeQuery()
+            ->fetchOne();
+
+        if ($option) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function getAttributeOptionId(): int
+    {
+        $attributeOptionId = $this->queryBuilder
+            ->select('attribute_option_id')
+            ->from('attribute_option')
+            ->orderBy('attribute_option_id', 'DESC')
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchOne();
+
+        if (!$attributeOptionId) {
+            return 1;
+        }
+
+        return $attributeOptionId + 1;
+    }
+
+    public function getAttributeTypeId(string $name): int
+    {
+        return $this->db->createQueryBuilder()
+            ->select('attribute_type_id')
+            ->from('attribute_type')
+            ->where('attribute_name = :attribute_name')
+            ->setParameter('attribute_name', $name)
+            ->executeQuery()
+            ->fetchOne();
+    }
+
+    public function getClassName(object $properties): string
+    {
+        $fullClassName = get_class($properties);
+        return basename(str_replace('\\', '/', $fullClassName));
+    }
+}

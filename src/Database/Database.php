@@ -1,7 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace App\Repository\Tech;
+namespace App\Database;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Query\QueryBuilder;
 
@@ -24,7 +25,7 @@ class Database
         $this->connection = DriverManager::getConnection($connectionParams);
     }
 
-    public function getConnection(): DriverManager
+    public function getConnection(): Connection
     {
         return $this->connection;
     }

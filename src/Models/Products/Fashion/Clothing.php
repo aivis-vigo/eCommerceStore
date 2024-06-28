@@ -88,4 +88,9 @@ class Clothing implements Product
     {
         return $this->brand;
     }
+
+    public function getAttributeArray(): array
+    {
+        return [];
+    }
 }

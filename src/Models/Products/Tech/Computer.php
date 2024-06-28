@@ -3,6 +3,9 @@
 namespace App\Models\Products\Tech;
 
 use App\Models\Attributes\Attribute;
+use App\Models\Attributes\Capacity\ComputerCapacity;
+use App\Models\Attributes\TouchId;
+use App\Models\Attributes\UsbPorts;
 
 class Computer extends Device
 {
@@ -11,22 +14,22 @@ class Computer extends Device
     public function __construct(object $properties)
     {
         parent::__construct($properties);
-        $this->capacity = new Attribute($properties->attributes[0]);
-        $this->usbPorts = new Attribute($properties->attributes[1]);
-        $this->touchID = new Attribute($properties->attributes[2]);
+        $this->capacity = new ComputerCapacity($properties->attributes[0]);
+        $this->usbPorts = new UsbPorts($properties->attributes[1]);
+        $this->touchID = new TouchId($properties->attributes[2]);
     }
 
-    public function getCapacity(): Attribute
+    public function getCapacity(): ComputerCapacity
     {
         return $this->capacity;
     }
 
-    public function getUsbPorts(): Attribute
+    public function getUsbPorts(): UsbPorts
     {
         return $this->usbPorts;
     }
 
-    public function getTouchID(): Attribute
+    public function getTouchID(): TouchId
     {
         return $this->touchID;
     }
@@ -34,5 +37,14 @@ class Computer extends Device
     public function helpDetermineMe(): bool
     {
         return true;
+    }
+
+    public function getAttributeArray(): array
+    {
+        return [
+            $this->getUsbPorts(),
+            $this->getTouchID(),
+            $this->getCapacity()
+        ];
     }
 }

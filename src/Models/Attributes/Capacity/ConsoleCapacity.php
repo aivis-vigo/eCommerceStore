@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace App\Models\Attributes;
+namespace App\Models\Attributes\Capacity;
+
+use App\Models\Attributes\Attribute;
 
 class  ConsoleCapacity extends Attribute
 {

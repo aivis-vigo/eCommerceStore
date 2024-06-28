@@ -1,10 +1,13 @@
 <?php declare(strict_types=1);
 
-namespace App\Repository\Tech;
+namespace App\Repository\Category;
 
+use App\Database\Database;
 use Doctrine\DBAL\Query\QueryBuilder;
 
-class PhoneRepository
+// todo: CRUD operations
+
+class CategoryRepository
 {
     private Database $db;
     private QueryBuilder $queryBuilder;
@@ -15,27 +18,44 @@ class PhoneRepository
         $this->queryBuilder = $this->db->createQueryBuilder();
     }
 
-    public function insertCategory(string $name) : void {
-        $category_id = $this->getCategoryCount();
+    public function insertOne(string $name) : void {
+        $category_id = $this->getCategoryId();
 
         $this->queryBuilder
-            ->insert('size_category')
+            ->insert('product_category')
             ->values([
-                'category_id' => ':category_id',
-                'category_name' => ':category_name',
+                'product_category_id' => ':product_category_id',
+                'category_name' => ':category_name'
             ])
-            ->setParameter('category_id', $category_id)
+            ->setParameter('product_category_id', $category_id)
             ->setParameter('category_name', $name)
             ->executeStatement();
     }
 
-    public function getCategoryCount() : int {
+    // select last inserted categories id so id's wouldn't overlap in case they are deleted
+    public function getCategoryId() : int {
         $count = $this->queryBuilder
             ->select('COUNT(*) as count')
-            ->from('size_category')
+            ->from('product_category')
             ->executeQuery()
             ->fetchOne();
 
-        return $count + 1;
+        if ($count === 0) {
+            return 1;
+        }
+
+        return $this->getLastEntry() + 1;
+    }
+
+    // [0] because there will always be only 1 value returned in array
+    public function getLastEntry(): int
+    {
+        return $this->queryBuilder
+            ->select('product_category_id')
+            ->from('product_category')
+            ->orderBy('product_category_id', 'DESC')
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchNumeric()[0];
     }
 }

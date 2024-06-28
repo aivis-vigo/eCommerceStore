@@ -7,7 +7,7 @@ use Doctrine\DBAL\Query\QueryBuilder;
 
 // todo: CRUD operations
 
-class OptionRepository
+class SizeCategoryRepository
 {
     private Database $db;
     private QueryBuilder $queryBuilder;

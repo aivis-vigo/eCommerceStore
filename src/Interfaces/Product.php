@@ -19,4 +19,6 @@ interface Product
     public function getPrices(): array;
 
     public function getBrand(): string;
+
+    public function getAttributeArray(): array;
 }
