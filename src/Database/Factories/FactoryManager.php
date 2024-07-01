@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Factories;
+namespace App\Database\Factories;
 
 use App\Models\Factories\FashionProductFactory;
 use App\Models\Factories\TechProductFactory;
