@@ -2,22 +2,38 @@
 
 namespace App\Repository\Product;
 
-use App\Database\Database;
 use App\Interfaces\Product;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
+// todo: read and write repos
 
-class ProductVariationRepository
+class ProductVariationRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
     }
+
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product_variation')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(int $product_item_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product_variation')
+            ->where('product_item_id = :product_item_id')
+            ->setParameter('product_item_id', $product_item_id)
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
 
     public function insertOne(Product $properties): void
     {
@@ -30,7 +46,7 @@ class ProductVariationRepository
                 $variationId = $this->getVariationId();
                 $sizeId = $this->getSizeId($sizeOption->getValue());
 
-                $this->db->createQueryBuilder()
+                $this->createQueryBuilder()
                     ->insert('product_variation')
                     ->values([
                         'variation_id' => ':variation_id',
@@ -54,7 +70,7 @@ class ProductVariationRepository
                     $variationId = $this->getVariationId();
                     $sizeId = null;
 
-                    $this->db->createQueryBuilder()
+                    $this->createQueryBuilder()
                         ->insert('product_variation')
                         ->values([
                             'variation_id' => ':variation_id',
@@ -74,7 +90,7 @@ class ProductVariationRepository
                 $inStock = $properties->isAvailable() ? 1 : 0;
                 $sizeId = null;
 
-                $this->db->createQueryBuilder()
+                $this->createQueryBuilder()
                     ->insert('product_variation')
                     ->values([
                         'variation_id' => ':variation_id',
@@ -93,7 +109,7 @@ class ProductVariationRepository
 
     public function getVariationId(): int
     {
-        $variationId = $this->db->createQueryBuilder()
+        $variationId = $this->createQueryBuilder()
             ->select('variation_id')
             ->from('product_variation')
             ->orderBy('variation_id', 'DESC')
@@ -114,7 +130,7 @@ class ProductVariationRepository
         if ($hexValue) {
             $colorId = $this->getColorId($hexValue);
 
-            return $this->db->createQueryBuilder()
+            return $this->createQueryBuilder()
                 ->select('product_item_id')
                 ->from('product_item')
                 ->where('product_id = :product_id')
@@ -126,7 +142,7 @@ class ProductVariationRepository
         }
 
         // for fashion products
-        return $this->db->createQueryBuilder()
+        return $this->createQueryBuilder()
             ->select('product_item_id')
             ->from('product_item')
             ->where('product_id = :product_id')
@@ -137,7 +153,7 @@ class ProductVariationRepository
 
     public function getSizeId(string $size): int
     {
-        return $this->db->createQueryBuilder()
+        return $this->createQueryBuilder()
             ->select("size_id")
             ->from("size_options")
             ->where("size_code = :size_code")
@@ -148,7 +164,7 @@ class ProductVariationRepository
 
     public function getColorId(string $colorHexValue): int
     {
-        return $this->db->createQueryBuilder()
+        return $this->createQueryBuilder()
             ->select('color_id')
             ->from('color')
             ->where('color_hex_value = :color_hex_value')

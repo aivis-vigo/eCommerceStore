@@ -2,21 +2,34 @@
 
 namespace App\Repository\Color;
 
-use App\Database\Database;
 use App\Models\Attributes\Option;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class ColorRepository
+class ColorRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
+    }
+
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('color')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(int $color_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('color')
+            ->where('color_id = :color_id')
+            ->setParameter('color_id', $color_id)
+            ->executeQuery()
+            ->fetchAssociative();
     }
 
     public function insertOne(Option $properties): void
@@ -26,7 +39,7 @@ class ColorRepository
             $colorName = $properties->getDisplayValue();
             $hexValue = $properties->getValue();
 
-            $this->db->createQueryBuilder()
+            $this->createQueryBuilder()
                 ->insert('color')
                 ->values([
                     'color_id' => ':color_id',
@@ -42,7 +55,7 @@ class ColorRepository
 
     public function checkIfExists(string $name): bool
     {
-        $colorName = $this->db->createQueryBuilder()
+        $colorName = $this->createQueryBuilder()
             ->select('color_name')
             ->from('color')
             ->where('color_name = :name')
@@ -59,7 +72,7 @@ class ColorRepository
 
     public function getColorId(): int
     {
-        $colorId = $this->queryBuilder
+        $colorId = $this->createQueryBuilder()
             ->select('color_id')
             ->from('color')
             ->orderBy('color_id', 'DESC')

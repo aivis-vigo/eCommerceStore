@@ -2,21 +2,34 @@
 
 namespace App\Repository\Attribute;
 
-use App\Database\Database;
 use App\Interfaces\Product;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class AttributeTypeRepository
+class AttributeTypeRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
+    }
+
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('attribute_type')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(int $attribute_type_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('attribute_type')
+            ->where('attribute_type_id = :attribute_type_id')
+            ->setParameter('attribute_type_id', $attribute_type_id)
+            ->executeQuery()
+            ->fetchAssociative();
     }
 
     public function insertOne(Product $properties): void
@@ -29,7 +42,7 @@ class AttributeTypeRepository
             if (!$this->checkIfExists($className)) {
                 $typeId = $this->getTypeId();
 
-                $this->db->createQueryBuilder()
+                $this->createQueryBuilder()
                     ->insert('attribute_type')
                     ->values([
                         'attribute_type_id' => ':attribute_type_id',
@@ -46,7 +59,7 @@ class AttributeTypeRepository
 
     public function checkIfExists(string $name): bool
     {
-        $colorName = $this->db->createQueryBuilder()
+        $colorName = $this->createQueryBuilder()
             ->select('attribute_type_id')
             ->from('attribute_type')
             ->where('attribute_name = :attribute_name')
@@ -63,7 +76,7 @@ class AttributeTypeRepository
 
     public function getTypeId(): int
     {
-        $typeId = $this->queryBuilder
+        $typeId = $this->createQueryBuilder()
             ->select('attribute_type_id')
             ->from('attribute_type')
             ->orderBy('attribute_type_id', 'DESC')

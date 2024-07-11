@@ -2,29 +2,28 @@
 
 namespace App\Database\Seeds;
 
-use App\Database\Database;
 use App\Models\Categories\Section;
 use App\Models\DataSource;
 use App\Database\Factories\FactoryManager;
-use App\Repository\Attribute\AttributeOptionRepository;
-use App\Repository\Attribute\AttributeTypeRepository;
-use App\Repository\Attribute\ProductAttributeRepository;
-use App\Repository\Brand\BrandRepository;
-use App\Repository\Category\CategoryRepository;
-use App\Repository\Category\SizeCategoryRepository;
-use App\Repository\Color\ColorRepository;
-use App\Repository\Image\ImageRepository;
-use App\Repository\Option\SizeOptionRepository;
-use App\Repository\Product\ProductItemRepository;
-use App\Repository\Product\ProductRepository;
-use App\Repository\Product\ProductVariationRepository;
+use App\Services\AttributeOptionService;
+use App\Services\AttributeTypeService;
+use App\Services\BrandService;
+use App\Services\CategoryService;
+use App\Services\ColorService;
+use App\Services\ImageService;
+use App\Services\ProductAttributeService;
+use App\Services\ProductItemService;
+use App\Services\ProductService;
+use App\Services\ProductVariationService;
+use App\Services\SizeCategoryService;
+use App\Services\SizeOptionService;
 
+// data are structure when class instance is created
 class DatabaseSeeder
 {
     private array $sections, $devices, $clothing;
     private DataSource $data;
     private FactoryManager $factoryManager;
-    private Database $database;
     private $category,
         $sizeCategory,
         $sizeOption,
@@ -45,79 +44,110 @@ class DatabaseSeeder
         $this->clothing = [];
         $this->data = new DataSource(__DIR__ . "/../../../data/data.json");
         $this->factoryManager = new FactoryManager();
-        $this->database = new Database();
 
-        $this->category = new CategoryRepository($this->getDatabase());
-        $this->sizeCategory = new SizeCategoryRepository($this->getDatabase());
-        $this->sizeOption = new SizeOptionRepository($this->getDatabase());
-        $this->brand = new BrandRepository($this->getDatabase());
-        $this->product = new ProductRepository($this->getDatabase());
-        $this->productItem = new ProductItemRepository($this->getDatabase());
-        $this->image = new ImageRepository($this->getDatabase());
-        $this->productVariation = new ProductVariationRepository($this->getDatabase());
-        $this->color = new ColorRepository($this->getDatabase());
-        $this->attributeType = new AttributeTypeRepository($this->getDatabase());
-        $this->attributeOption = new AttributeOptionRepository($this->getDatabase());
-        $this->productAttribute = new ProductAttributeRepository($this->getDatabase());
+        $this->category = new CategoryService();
+        $this->sizeCategory = new SizeCategoryService();
+        $this->sizeOption = new SizeOptionService();
+        $this->brand = new BrandService();
+        $this->product = new ProductService();
+        $this->productItem = new ProductItemService();
+        $this->image = new ImageService();
+        $this->productVariation = new ProductVariationService();
+        $this->color = new ColorService();
+        $this->attributeType = new AttributeTypeService();
+        $this->attributeOption = new AttributeOptionService();
+        $this->productAttribute = new ProductAttributeService();
 
         $this->structureData();
     }
 
     public function run(): void
     {
-        var_dump($this->devices);
 
-        /*foreach ($this->sections as $section) {
-            $category->insertOne($section->getName());
-        }*/
+        $this->insertCategories($this->sections);
+        $this->insertFashionItems($this->clothing);
+        $this->insertElectronics($this->devices);
+    }
 
-        // todo: need to insert only once for each category and if it doesn't already exist
-        // todo: fashion and tech has its own seeders or each model
-        /*foreach ($clothing as $wearable) {
+    public function insertCategories(array $categories): void
+    {
+        foreach ($categories as $section) {
+            $this->category->insertOne($section->getName());
+        }
+    }
+
+    public function insertFashionItems(array $clothing): void
+    {
+        foreach ($clothing as $wearable) {
             $sizes = $wearable->getSize()->getOptions();
-
             if (count($sizes) > 0) {
                 foreach ($sizes as $size) {
                     if (is_numeric($size->getValue())) {
-                        $sizeOption->insertOne(1, $size->getDisplayValue(), $size->getvalue());
+                        $this->sizeOption->insertOne([
+                            'sizeCategoryId' => 1,
+                            'displayValue' => $size->getDisplayValue(),
+                            'value' => $size->getValue(),
+                        ]);
                     } else {
-                        $sizeOption->insertOne(2, $size->getDisplayValue(), $size->getvalue());
+                        $this->sizeOption->insertOne([
+                            'sizeCategoryId' => 2,
+                            'displayValue' => $size->getDisplayValue(),
+                            'value' => $size->getValue(),
+                        ]);
                     }
                 }
             }
-
             $brandName = $wearable->getBrand();
-            $brand->insertOne($brandName);
-
-            $product->insertOne($wearable);
-
-            $productItem->insertOne($wearable);
-
-            foreach ($wearable->getPictures() as $picture) {
-                $image->insertOne($wearable->getId(), $picture);
+            $this->brand->insertOne($brandName);
+            $this->product->insertOne($wearable);
+            $this->productItem->insertOne($wearable);
+            foreach ($wearable->getImages() as $image) {
+                $this->image->insertOne([
+                    'productId' => $wearable->getId(),
+                    'colorName' => null,
+                    'imageUrl' => $image,
+                ]);
             }
+            $this->productVariation->insertOne($wearable);
+        }
+    }
 
-            $productVariation->insertOne($wearable);
-        }*/
-
-        /*foreach ($devices as $device) {
-            $brand->insertOne($device->getBrand());
-            $product->insertOne($device);
+    public function insertElectronics(array $devices): void
+    {
+        foreach ($devices as $device) {
+            $this->brand->insertOne($device->getBrand());
+            $this->product->insertOne($device);
             if (method_exists($device, "getColor")) {
                 foreach ($device->getColor()->getOptions() as $deviceColor) {
-                    $color->insertOne($deviceColor);
+                    $this->color->insertOne($deviceColor);
                 }
             }
-            $productItem->insertOne($device);
-            // todo: only one item gets pictures
-            foreach ($device->getPictures() as $picture) {
-                $image->insertOne($device->getId(), $picture);
+            $this->productItem->insertOne($device);
+            if (method_exists($device, "getColor")) {
+                $deviceColors = $device->getColor()->getOptions();
+                foreach ($deviceColors as $deviceColor) {
+                    foreach ($device->getImages() as $image) {
+                        $this->image->insertOne([
+                            'productId' => $device->getId(),
+                            'colorName' => $deviceColor->getDisplayValue(),
+                            'imageUrl' => $image,
+                        ]);
+                    }
+                }
+            } else {
+                foreach ($device->getImages() as $image) {
+                    $this->image->insertOne([
+                        'productId' => $device->getId(),
+                        'colorName' => null,
+                        'imageUrl' => $image,
+                    ]);
+                }
             }
-            $productVariation->insertOne($device);
-            $attributeType->insertOne($device);
-            $attributeOption->insertOne($device->getAttributeArray());
-            $productAttribute->insertOne($device);
-        }*/
+            $this->productVariation->insertOne($device);
+            $this->attributeType->insertOne($device);
+            $this->attributeOption->insertOne($device->getAttributeArray());
+            $this->productAttribute->insertOne($device);
+        }
     }
 
     public function structureData(): void
@@ -141,10 +171,5 @@ class DatabaseSeeder
                 $this->clothing[] = $item;
             }
         }
-    }
-
-    public function getDatabase(): Database
-    {
-        return $this->database;
     }
 }

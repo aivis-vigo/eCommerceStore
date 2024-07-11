@@ -66,7 +66,6 @@ class TechProductFactory extends Creator
         // class properties have to be in the same order as those in provided data source
         for ($i = 0; $i < count($allAttributes); $i++) {
             if ($allAttributes[$i] !== $reflectionClass->getProperties()[$i]->getName()) {
-                // todo: this can be improved
                 if (count($allAttributes) === 3 && $reflectionClass->hasMethod('helpDetermineMe')) {
                     return true;
                 }

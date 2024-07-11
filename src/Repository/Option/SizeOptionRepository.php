@@ -2,26 +2,20 @@
 
 namespace App\Repository\Option;
 
-use App\Database\Database;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class SizeOptionRepository
+class SizeOptionRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
     }
 
-    public function insertOne(int $sizeCategoryId, string $displayValue, string $sizeCode) : void {
+    public function insertOne(array $sizeOption): void
+    {
         $sizeId = $this->getSizeId();
 
-        $this->queryBuilder
+        $this->createQueryBuilder()
             ->insert('size_options')
             ->values([
                 'size_id' => ':size_id',
@@ -30,15 +24,36 @@ class SizeOptionRepository
                 'size_code' => ':size_code'
             ])
             ->setParameter('size_id', $sizeId)
-            ->setParameter('size_category_id', $sizeCategoryId)
-            ->setParameter('size_display_value', $displayValue)
-            ->setParameter('size_code', $sizeCode)
+            ->setParameter('size_category_id', $sizeOption['sizeCategoryId'])
+            ->setParameter('size_display_value', $sizeOption['displayValue'])
+            ->setParameter('size_code', $sizeOption['value'])
             ->executeStatement();
     }
 
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('size_options')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(int $sizeId): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('size_options')
+            ->where('size_id = :size_id')
+            ->setParameter('size_id', $sizeId)
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
     // select last inserted categories id so id's wouldn't overlap in case they are deleted
-    public function getSizeId() : int {
-        $count = $this->queryBuilder
+    public function getSizeId(): int
+    {
+        $count = $this->createQueryBuilder()
             ->select('COUNT(*) as count')
             ->from('size_options')
             ->executeQuery()
@@ -54,7 +69,7 @@ class SizeOptionRepository
     // [0] because there will always be only 1 value returned in array
     public function getLastEntry(): int
     {
-        return $this->queryBuilder
+        return $this->createQueryBuilder()
             ->select('size_id')
             ->from('size_options')
             ->orderBy('size_id', 'DESC')

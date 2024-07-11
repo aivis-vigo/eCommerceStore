@@ -2,21 +2,34 @@
 
 namespace App\Repository\Attribute;
 
-use App\Database\Database;
 use App\Interfaces\Product;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class ProductAttributeRepository
+class ProductAttributeRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
+    }
+
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product_attribute')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(string $product_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product_attribute')
+            ->where('product_id = :product_id')
+            ->setParameter('product_id', $product_id)
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
 
     public function insertOne(Product $properties): void
@@ -33,7 +46,7 @@ class ProductAttributeRepository
             foreach ($options as $option) {
                 $attributeOptionId = $this->getAttributeOptionId($attributeTypeId, $option->getValue());
 
-                $this->db->createQueryBuilder()
+                $this->createQueryBuilder()
                     ->insert('product_attribute')
                     ->values([
                         'product_id' => ':product_id',
@@ -51,7 +64,7 @@ class ProductAttributeRepository
     public function getProductId(string $name): string
 
     {
-        return $this->queryBuilder
+        return $this->createQueryBuilder()
             ->select('product_id')
             ->from('product')
             ->where('name = :name')
@@ -62,7 +75,7 @@ class ProductAttributeRepository
 
     public function getAttributeTypeId(string $name): int
     {
-        return $this->queryBuilder
+        return $this->createQueryBuilder()
             ->select('attribute_type_id')
             ->from('attribute_type')
             ->where('attribute_name = :attribute_name')
@@ -73,7 +86,7 @@ class ProductAttributeRepository
 
     public function getAttributeOptionId(int $attributeTypeId, string $name): int
     {
-        return $this->db->createQueryBuilder()
+        return $this->createQueryBuilder()
             ->select('attribute_option_id')
             ->from('attribute_option')
             ->where('attribute_type_id = :attribute_type_id')

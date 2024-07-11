@@ -2,26 +2,20 @@
 
 namespace App\Repository\Category;
 
-use App\Database\Database;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class CategoryRepository
+class CategoryRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
     }
 
-    public function insertOne(string $name) : void {
+    public function insertOne(string $name): void
+    {
         $category_id = $this->getCategoryId();
 
-        $this->queryBuilder
+        $this->createQueryBuilder()
             ->insert('product_category')
             ->values([
                 'product_category_id' => ':product_category_id',
@@ -32,9 +26,30 @@ class CategoryRepository
             ->executeStatement();
     }
 
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product_category')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(int $product_category_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product_category')
+            ->where('product_category_id = :product_category_id')
+            ->setParameter('product_category_id', $product_category_id)
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
     // select last inserted categories id so id's wouldn't overlap in case they are deleted
-    public function getCategoryId() : int {
-        $count = $this->queryBuilder
+    public function getCategoryId(): int
+    {
+        $count = $this->createQueryBuilder()
             ->select('COUNT(*) as count')
             ->from('product_category')
             ->executeQuery()
@@ -50,7 +65,7 @@ class CategoryRepository
     // [0] because there will always be only 1 value returned in array
     public function getLastEntry(): int
     {
-        return $this->queryBuilder
+        return $this->createQueryBuilder()
             ->select('product_category_id')
             ->from('product_category')
             ->orderBy('product_category_id', 'DESC')

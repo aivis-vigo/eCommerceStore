@@ -2,21 +2,35 @@
 
 namespace App\Repository\Product;
 
-use App\Database\Database;
 use App\Interfaces\Product;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class ProductRepository
+// todo: make exception for Product not found
+class ProductRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
+    }
+
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product')
+            ->executeQuery()
+            ->fetchAllAssociative();
+    }
+
+    public function findOneById(string $product_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product')
+            ->where('product_id = :product_id')
+            ->setParameter('product_id', $product_id)
+            ->executeQuery()
+            ->fetchAssociative();
     }
 
     public function insertOne(Product $properties): void
@@ -28,7 +42,7 @@ class ProductRepository
             $name = $properties->getName();
             $description = $properties->getDescription();
 
-            $this->queryBuilder
+            $this->createQueryBuilder()
                 ->insert('product')
                 ->values([
                     'product_id' => ':product_id',
@@ -48,7 +62,7 @@ class ProductRepository
 
     public function checkIfExists(string $name): bool
     {
-        $brandId = $this->db->createQueryBuilder()
+        $brandId = $this->createQueryBuilder()
             ->select('product_id')
             ->from('product')
             ->where('name = :name')
@@ -65,7 +79,7 @@ class ProductRepository
 
     public function getProductCategoryId(string $category): int
     {
-        return $this->queryBuilder
+        return $this->createQueryBuilder()
             ->select('product_category_id')
             ->from('product_category')
             ->where('category_name = :category_name')
@@ -76,7 +90,7 @@ class ProductRepository
 
     public function getBrandId(string $brandName): int
     {
-        return $this->queryBuilder
+        return $this->createQueryBuilder()
             ->select('brand_id')
             ->from('brand')
             ->where('brand_name = :brand_name')

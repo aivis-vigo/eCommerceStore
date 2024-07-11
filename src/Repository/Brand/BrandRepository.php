@@ -2,28 +2,42 @@
 
 namespace App\Repository\Brand;
 
-use App\Database\Database;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class BrandRepository
+class BrandRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
+    }
+
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('brand')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(int $brand_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('brand')
+            ->where('brand_id = :brand_id')
+            ->setParameter('brand_id', $brand_id)
+            ->executeQuery()
+            ->fetchAssociative();
     }
 
     // if brand doesn't exist create new one or use existing one
-    public function insertOne(string $name) : void {
+    public function insertOne(string $name): void
+    {
         if (!$this->checkIfExists($name)) {
             $brandId = $this->getBrandId();
 
-            $this->queryBuilder
+            $this->createQueryBuilder()
                 ->insert('brand')
                 ->values([
                     'brand_id' => ':brand_id',
@@ -35,8 +49,9 @@ class BrandRepository
         }
     }
 
-    public function checkIfExists(string $name): bool {
-        $brandId = $this->db->createQueryBuilder()
+    public function checkIfExists(string $name): bool
+    {
+        $brandId = $this->createQueryBuilder()
             ->select('brand_id')
             ->from('brand')
             ->where('brand_name = :brand_name')
@@ -52,8 +67,9 @@ class BrandRepository
     }
 
     // select last inserted categories id so id's wouldn't overlap in case they are deleted
-    public function getBrandId() : int {
-        $count = $this->queryBuilder
+    public function getBrandId(): int
+    {
+        $count = $this->createQueryBuilder()
             ->select('COUNT(*) as count')
             ->from('brand')
             ->executeQuery()
@@ -69,7 +85,7 @@ class BrandRepository
     // [0] because there will always be only 1 value returned in array
     public function getLastEntry(): int
     {
-        return $this->queryBuilder
+        return $this->createQueryBuilder()
             ->select('brand_id')
             ->from('brand')
             ->orderBy('brand_id', 'DESC')

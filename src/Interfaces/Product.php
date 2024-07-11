@@ -4,13 +4,14 @@ namespace App\Interfaces;
 
 interface Product
 {
+
     public function getId(): string;
 
     public function getName(): string;
 
     public function isAvailable(): bool;
 
-    public function getPictures(): array;
+    public function getImages(): array;
 
     public function getDescription(): string;
 

@@ -2,20 +2,44 @@
 
 namespace App\Repository\Attribute;
 
-use App\Database\Database;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class AttributeOptionRepository
+class AttributeOptionRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
+    }
+
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('attribute_option')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(int $attribute_option_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('attribute_option')
+            ->where('attribute_option_id = :attribute_option_id')
+            ->setParameter('attribute_option_id', $attribute_option_id)
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findAllById(int $attribute_type_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('attribute_option')
+            ->where('attribute_type_id = :attribute_type_id')
+            ->setParameter('attribute_type_id', $attribute_type_id)
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
 
     public function insertOne(array $types): void
@@ -33,7 +57,7 @@ class AttributeOptionRepository
                         $optionId = $this->getAttributeOptionId();
                         $value = $option->getValue();
 
-                        $this->db->createQueryBuilder()
+                        $this->createQueryBuilder()
                             ->insert('attribute_option')
                             ->values([
                                 'attribute_option_id' => ':attribute_option_id',
@@ -41,9 +65,9 @@ class AttributeOptionRepository
                                 'attribute_option_value' => ':attribute_option_value'
                             ])
                             ->setParameters([
-                                ':attribute_option_id' => $optionId,
-                                ':attribute_type_id' => $typeId,
-                                ':attribute_option_value' => $value
+                                'attribute_option_id' => $optionId,
+                                'attribute_type_id' => $typeId,
+                                'attribute_option_value' => $value
                             ])
                             ->executeStatement();
                     }
@@ -54,14 +78,14 @@ class AttributeOptionRepository
 
     public function checkIfExists(int $typeId, string $value): bool
     {
-        $option = $this->db->createQueryBuilder()
+        $option = $this->createQueryBuilder()
             ->select('attribute_option_id')
             ->from('attribute_option')
             ->where('attribute_type_id = :attribute_type_id')
             ->andWhere('attribute_option_value = :value')
             ->setParameters([
-                ':attribute_type_id' => $typeId,
-                ':value' => $value
+                'attribute_type_id' => $typeId,
+                'value' => $value
             ])
             ->executeQuery()
             ->fetchOne();
@@ -75,13 +99,14 @@ class AttributeOptionRepository
 
     public function getAttributeOptionId(): int
     {
-        $attributeOptionId = $this->queryBuilder
+        $attributeOptionId = $this->createQueryBuilder()
             ->select('attribute_option_id')
             ->from('attribute_option')
             ->orderBy('attribute_option_id', 'DESC')
             ->setMaxResults(1)
             ->executeQuery()
             ->fetchOne();
+
 
         if (!$attributeOptionId) {
             return 1;
@@ -92,7 +117,7 @@ class AttributeOptionRepository
 
     public function getAttributeTypeId(string $name): int
     {
-        return $this->db->createQueryBuilder()
+        return $this->createQueryBuilder()
             ->select('attribute_type_id')
             ->from('attribute_type')
             ->where('attribute_name = :attribute_name')

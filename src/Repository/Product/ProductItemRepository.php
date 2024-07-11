@@ -2,21 +2,34 @@
 
 namespace App\Repository\Product;
 
-use App\Database\Database;
 use App\Interfaces\Product;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class ProductItemRepository
+class ProductItemRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
+    }
+
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product_item')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(string $product_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product_item')
+            ->where('product_id = :product_id')
+            ->setParameter('product_id', $product_id)
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
 
     public function insertOne(Product $properties): void
@@ -30,7 +43,7 @@ class ProductItemRepository
             foreach ($colors as $color) {
                 $productItemId = $this->getProductItemId();
                 $colorId = $this->getColorId($color->getDisplayValue());
-                $this->db->createQueryBuilder()
+                $this->createQueryBuilder()
                     ->insert('product_item')
                     ->values([
                         'product_item_id' => ':product_item_id',
@@ -46,7 +59,7 @@ class ProductItemRepository
             }
         } else {
             $productItemId = $this->getProductItemId();
-            $this->db->createQueryBuilder()
+            $this->createQueryBuilder()
                 ->insert('product_item')
                 ->values([
                     'product_item_id' => ':product_item_id',
@@ -69,7 +82,7 @@ class ProductItemRepository
 
     public function getProductItemId(): int
     {
-        $productItemId = $this->db->createQueryBuilder()
+        $productItemId = $this->createQueryBuilder()
             ->select('product_item_id')
             ->from('product_item')
             ->orderBy('product_item_id', 'DESC')
@@ -86,7 +99,7 @@ class ProductItemRepository
 
     public function getColorId(string $colorName): int
     {
-        return $this->db->createQueryBuilder()
+        return $this->createQueryBuilder()
             ->select('color_id')
             ->from('color')
             ->where('color_name = :color_name')

@@ -59,7 +59,7 @@ class Clothing implements Product
         return $this->available;
     }
 
-    public function getPictures(): array
+    public function getImages(): array
     {
         return $this->pictures;
     }

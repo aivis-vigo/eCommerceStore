@@ -4,6 +4,7 @@ namespace App\Models\Products\Tech;
 
 use App\Interfaces\Product;
 use App\Models\Currency\Price;
+use App\Models\Products\Brand;
 
 class Device implements Product
 {
@@ -56,7 +57,7 @@ class Device implements Product
         return $this->available;
     }
 
-    public function getPictures(): array
+    public function getImages(): array
     {
         return $this->pictures;
     }

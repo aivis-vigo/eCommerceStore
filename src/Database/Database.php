@@ -6,8 +6,6 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Query\QueryBuilder;
 
-// todo: move to .env and download a package for that
-
 class Database
 {
     private $connection;
@@ -15,10 +13,10 @@ class Database
     public function __construct()
     {
         $connectionParams = [
-            'dbname' => 'ecommerceshop',
-            'user' => 'root',
-            'password' => 'my-secret-pw',
-            'host' => '127.0.0.1',
+            'dbname' => $_ENV['DB_NAME'],
+            'user' => $_ENV['DB_USER'],
+            'password' => $_ENV['PASSWORD'],
+            'host' => $_ENV['HOST'],
             'driver' => 'pdo_mysql',
         ];
 

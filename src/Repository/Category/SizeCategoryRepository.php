@@ -2,26 +2,20 @@
 
 namespace App\Repository\Category;
 
-use App\Database\Database;
-use Doctrine\DBAL\Query\QueryBuilder;
+use App\Repository\BaseRepository;
 
-// todo: CRUD operations
-
-class SizeCategoryRepository
+class SizeCategoryRepository extends BaseRepository
 {
-    private Database $db;
-    private QueryBuilder $queryBuilder;
-
-    public function __construct(Database $db)
+    public function __construct()
     {
-        $this->db = $db;
-        $this->queryBuilder = $this->db->createQueryBuilder();
+        parent::__construct();
     }
 
-    public function insertOne(string $name) : void {
+    public function insertOne(string $name): void
+    {
         $category_id = $this->getCategoryId();
 
-        $this->queryBuilder
+        $this->createQueryBuilder()
             ->insert('size_category')
             ->values([
                 'category_id' => ':category_id',
@@ -32,9 +26,29 @@ class SizeCategoryRepository
             ->executeStatement();
     }
 
-    // select last inserted categories id so id's wouldn't overlap in case they are deleted
-    public function getCategoryId() : int {
-        $count = $this->queryBuilder
+    public function findAll(): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('size_category')
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneById(int $category_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('size_category')
+            ->where('category_id = :category_id')
+            ->setParameter('category_id', $category_id)
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function getCategoryId(): int
+    {
+        $count = $this->createQueryBuilder()
             ->select('COUNT(*) as count')
             ->from('size_category')
             ->executeQuery()
@@ -47,15 +61,14 @@ class SizeCategoryRepository
         return $this->getLastEntry() + 1;
     }
 
-    // [0] because there will always be only 1 value returned in array
     public function getLastEntry(): int
     {
-        return $this->queryBuilder
+        return $this->createQueryBuilder()
             ->select('category_id')
             ->from('size_category')
             ->orderBy('category_id', 'DESC')
             ->setMaxResults(1)
             ->executeQuery()
-            ->fetchNumeric()[0];
+            ->fetchOne();
     }
 }
