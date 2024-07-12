@@ -1,4 +1,4 @@
-vendor/
+backend/vendor/
 .idea
 package.xml
-.env
+backend/.env
