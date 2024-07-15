@@ -2,7 +2,7 @@
 
 namespace App\Type\Scalar;
 
-use App\Models\Products\Brand;
+use App\Models\Attributes\Attribute;
 use App\Type\TypeRegistry;
 use GraphQL\Type\Definition\InterfaceType;
 use GraphQL\Type\Definition\Type;

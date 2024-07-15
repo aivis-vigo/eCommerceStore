@@ -5,7 +5,6 @@ namespace App\Type\Scalar;
 use App\Services\BrandService;
 use App\Services\ImageService;
 use App\Type\TypeRegistry;
-use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 

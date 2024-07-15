@@ -32,7 +32,7 @@ class CategoryRepository extends BaseRepository
             ->select('*')
             ->from('product_category')
             ->executeQuery()
-            ->fetchAssociative();
+            ->fetchAllAssociative();
     }
 
     public function findOneById(int $product_category_id): array
@@ -42,6 +42,17 @@ class CategoryRepository extends BaseRepository
             ->from('product_category')
             ->where('product_category_id = :product_category_id')
             ->setParameter('product_category_id', $product_category_id)
+            ->executeQuery()
+            ->fetchAssociative();
+    }
+
+    public function findOneByName(string $category_name): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product_category')
+            ->where('category_name = :category_name')
+            ->setParameter('category_name', $category_name)
             ->executeQuery()
             ->fetchAssociative();
     }

@@ -2,7 +2,9 @@
 
 namespace App\Controllers;
 
+use App\Services\CategoryService;
 use App\Services\ProductService;
+use App\Type\Scalar\CategoryType;
 use App\Type\Scalar\ProductType;
 use App\Type\TypeRegistry;
 use GraphQL\GraphQL as GraphQLBase;
@@ -15,13 +17,18 @@ use Throwable;
 
 class GraphQL
 {
-    // todo: there can be multiple queries and each in it's own file
     static public function handle()
     {
         try {
             $queryType = new ObjectType([
-                'name' => 'AllProducts',
+                'name' => 'Query',
                 'fields' => [
+                    'categories' => [
+                        'type' => Type::listOf(TypeRegistry::type(CategoryType::class)),
+                        'resolve' => function () {
+                            return (new CategoryService())->findAll();
+                        }
+                    ],
                     // all products
                     'products' => [
                         'type' => Type::listOf(TypeRegistry::type(ProductType::class)),
@@ -37,6 +44,15 @@ class GraphQL
                         ],
                         'resolve' => function ($root, array $args): array {
                             return (new ProductService())->findOneById($args['product_id']);
+                        }
+                    ],
+                    'product_category' => [
+                        'type' => Type::listOf(TypeRegistry::type(ProductType::class)),
+                        'args' => [
+                          'category_name' => new NonNull(Type::string()),
+                        ],
+                        'resolve' => function ($root, array $args): array {
+                            return (new ProductService())->findAllByCategory($args['category_name']);
                         }
                     ]
                 ],

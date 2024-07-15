@@ -29,6 +29,11 @@ class CategoryService implements BaseService
         return $this->getRepository()->findOneById($id);
     }
 
+    public function findOneByName($name): array
+    {
+        return $this->getRepository()->findOneByName($name);
+    }
+
     public function getRepository(): CategoryRepository
     {
         return $this->categoryRepository;

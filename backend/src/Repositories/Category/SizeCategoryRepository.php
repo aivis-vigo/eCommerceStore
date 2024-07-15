@@ -32,7 +32,7 @@ class SizeCategoryRepository extends BaseRepository
             ->select('*')
             ->from('size_category')
             ->executeQuery()
-            ->fetchAssociative();
+            ->fetchAllAssociative();
     }
 
     public function findOneById(int $category_id): array

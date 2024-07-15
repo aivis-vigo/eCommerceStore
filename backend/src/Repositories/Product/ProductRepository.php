@@ -33,6 +33,16 @@ class ProductRepository extends BaseRepository
             ->fetchAssociative();
     }
 
+    public function findAllByCategoryId(int $product_category_id): array {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('product')
+            ->where('product_category_id = :product_category_id')
+            ->setParameter('product_category_id', $product_category_id)
+            ->executeQuery()
+            ->fetchAllAssociative();
+    }
+
     public function insertOne(Product $properties): void
     {
         if (!$this->checkIfExists($properties->getName())) {
