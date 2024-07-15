@@ -1,6 +1,13 @@
 import React from 'react';
+import {useQuery} from "@apollo/client";
+import {GET_ALL_CATEGORIES} from "../Queries/queries";
 
-export default function Navbar() {
+export default function NavigationBar() {
+    const {loading, error, data} = useQuery(GET_ALL_CATEGORIES);
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error.message}</p>;
+
     return (
         <section className="relative mx-auto w-full">
             {/* Navbar */}
@@ -10,8 +17,14 @@ export default function Navbar() {
                     <div className="flex items-center space-x-5">
                         {/* Nav Links */}
                         <ul className="hidden md:flex px-4 font-semibold font-heading space-x-12">
-                            <li><a className="hover:text-gray-200" href="#">Tech</a></li>
-                            <li><a className="hover:text-gray-200" href="#">Fashion</a></li>
+                            {data.categories.map((category) => (
+                            <li key={category.product_category_id}>
+                                {/* todo: links for each category */}
+                                <a className="hover:text-gray-200" href={category.category_name}>
+                                    {category.category_name}
+                                </a>
+                            </li>
+                            ))}
                         </ul>
                     </div>
                     {/* Center section for logo */}

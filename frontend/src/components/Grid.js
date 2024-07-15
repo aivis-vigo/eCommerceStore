@@ -1,6 +1,6 @@
 import React from "react";
 import {useQuery} from "@apollo/client";
-import {GET_ALL_PRODUCTS} from "../queries";
+import {GET_ALL_PRODUCTS} from "../Queries/queries";
 
 function Index() {
     const {loading, error, data} = useQuery(GET_ALL_PRODUCTS);
@@ -14,10 +14,9 @@ function Index() {
                 <div key={product.id} className="rounded border border-gray-300 p-4">
                     <img src={product.images[0].image_url}/>
                     <h2 className="text-lg font-semibold">{product.name}</h2>
+                    {/* todo: div should stay always on the bottom  */}
                     <div className="mt-4 flex justify-between items-center">
-                        {/* todo: price calculation should be in utils? */}
-                        <span
-                            className="text-gray-900 font-bold">${product.original_price}</span>
+                        <span className="text-gray-900 font-bold">${product.original_price}</span>
                     </div>
                 </div>
             ))}
