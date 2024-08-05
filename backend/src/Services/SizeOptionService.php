@@ -28,6 +28,10 @@ class SizeOptionService implements BaseService {
         return $this->getRepository()->findAll();
     }
 
+    public function findAllByCategoryId($id): array {
+        return $this->getRepository()->findAllByCategoryId($id);
+    }
+
     public function findOneById($id): array
     {
         return $this->getRepository()->findOneById($id);

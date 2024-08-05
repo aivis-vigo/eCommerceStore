@@ -14,6 +14,12 @@ class ImageType extends ObjectType
             'name' => 'Image',
             'description' => 'Product colors',
             'fields' => static fn(): array => [
+                'id' => [
+                    'type' => Type::id(),
+                    'resolve' => function ($root) {
+                        return $root['id'];
+                    }
+                ],
                 'image_id' => [
                     'type' => Type::int(),
                     'resolve' => function ($root) {

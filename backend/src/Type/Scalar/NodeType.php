@@ -74,6 +74,14 @@ class NodeType extends InterfaceType
             return TypeRegistry::type(Attribute::class);
         }
 
+        if ($object instanceof SizeOptionType) {
+            return TypeRegistry::type(SizeOptionType::class);
+        }
+
+        if ($object instanceof CartItemType) {
+            return TypeRegistry::type(CartItemType::class);
+        }
+
         $notNode = Utils::printSafe($object);
         throw new \Exception("Unknown type: {$notNode}");
     }

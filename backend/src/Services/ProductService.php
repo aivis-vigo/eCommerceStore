@@ -31,6 +31,10 @@ class ProductService implements BaseService
         return $this->getRepository()->findOneById($id);
     }
 
+    public function findProductCategory(int $id): string {
+        return $this->getRepository()->findProductCategory($id);
+    }
+
     public function findAllByCategory($categoryName): array {
         $category = (new CategoryService())->findOneByName($categoryName);
         $categoryId = $category["product_category_id"];

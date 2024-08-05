@@ -14,6 +14,12 @@ class BrandType extends ObjectType
             'name' => 'Brand',
             'description' => 'Item brand info',
             'fields' => static fn(): array => [
+                'id' => [
+                    'type' => Type::id(),
+                    'resolve' => function ($root) {
+                        return $root['id'];
+                    }
+                ],
                 'brand_id' => [
                     'type' => Type::int(),
                     'resolve' => function ($root) {

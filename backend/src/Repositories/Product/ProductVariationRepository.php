@@ -20,7 +20,17 @@ class ProductVariationRepository extends BaseRepository
             ->select('*')
             ->from('product_variation')
             ->executeQuery()
-            ->fetchAssociative();
+            ->fetchAllAssociative();
+    }
+
+    public function findAllByProductId(string $productId): array {
+        return $this->createQueryBuilder()
+            ->select('size_id')
+            ->from('product_variation')
+            ->where('product_id = :productId')
+            ->setParameter('productId', $productId)
+            ->executeQuery()
+            ->fetchAllAssociative();
     }
 
     public function findOneById(string $product_id): array

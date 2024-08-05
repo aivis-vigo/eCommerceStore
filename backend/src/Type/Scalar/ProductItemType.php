@@ -4,7 +4,6 @@ namespace App\Type\Scalar;
 
 use App\Services\AttributeOptionService;
 use App\Services\AttributeTypeService;
-use App\Services\ColorService;
 use App\Services\ImageService;
 use App\Services\ProductAttributeService;
 use App\Services\ProductVariationService;
@@ -42,12 +41,6 @@ class ProductItemType extends ObjectType
                     'type' => Type::int(),
                     'resolve' => function ($root) {
                         return $root['original_price'];
-                    }
-                ],
-                'color' => [
-                    'type' => TypeRegistry::type(ColorType::class),
-                    'resolve' => function ($root) {
-                        return (new ColorService())->findOneById($root['color_id']);
                     }
                 ],
                 'images' => [

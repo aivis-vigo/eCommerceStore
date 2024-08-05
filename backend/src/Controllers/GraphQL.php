@@ -3,16 +3,21 @@
 namespace App\Controllers;
 
 use App\Services\CategoryService;
+use App\Services\OrderLineService;
 use App\Services\ProductService;
+use App\Services\ShopOrderService;
+use App\Type\Scalar\CartItemType;
 use App\Type\Scalar\CategoryType;
 use App\Type\Scalar\ProductType;
 use App\Type\TypeRegistry;
 use GraphQL\GraphQL as GraphQLBase;
+use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Schema;
 use GraphQL\Type\SchemaConfig;
+use Ramsey\Uuid\Uuid;
 use Throwable;
 
 class GraphQL
@@ -49,7 +54,7 @@ class GraphQL
                     'product_category' => [
                         'type' => Type::listOf(TypeRegistry::type(ProductType::class)),
                         'args' => [
-                          'category_name' => new NonNull(Type::string()),
+                            'category_name' => new NonNull(Type::string()),
                         ],
                         'resolve' => function ($root, array $args): array {
                             return (new ProductService())->findAllByCategory($args['category_name']);
@@ -61,13 +66,50 @@ class GraphQL
             $mutationType = new ObjectType([
                 'name' => 'Mutation',
                 'fields' => [
-                    'sum' => [
-                        'type' => Type::int(),
+                    'placeOrder' => [
+                        'type' => Type::nonNull(Type::string()),
                         'args' => [
-                            'x' => ['type' => Type::int()],
-                            'y' => ['type' => Type::int()],
+                            'items' => [
+                                'type' => Type::nonNull(Type::listOf(TypeRegistry::type(CartItemType::class)))
+                            ],
                         ],
-                        'resolve' => static fn($calc, array $args): int => $args['x'] + $args['y'],
+                        'resolve' => function ($root, array $args) {
+                            error_log('placeOrder called with args: ' . print_r($args, true));
+
+                            try {
+                                $orderId = Uuid::uuid4()->toString();
+                                $total = 0;
+
+                                foreach ($args['items'] as $item) {
+                                    error_log('Processing item: ' . print_r($item, true));
+                                    // Validate and calculate
+                                    if (!isset($item['productId'], $item['quantity'], $item['price'])) {
+                                        throw new \Exception('Invalid item data');
+                                    }
+                                    $total += $item['quantity'] * $item['price'];
+                                }
+
+                                // Insert order
+                                (new ShopOrderService())->insert([
+                                    'orderId' => $orderId,
+                                    'total' => $total,
+                                ]);
+
+                                // Insert order lines
+                                $orderLineService = new OrderLineService();
+                                foreach ($args['items'] as $item) {
+                                    $item['orderId'] = $orderId;
+                                    var_dump($item);
+                                    $orderLineService->insert($item);
+                                }
+
+                                return $orderId;
+                            } catch (Throwable $e) {
+                                error_log('Error in placeOrder: ' . $e->getMessage());
+                                throw $e; // Rethrow to be captured by GraphQL
+                            }
+                        },
+
                     ],
                 ],
             ]);

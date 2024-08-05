@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
 use App\Controllers\GraphQL;
-use App\Database\Seeds\DatabaseSeeder;
 use Dotenv\Dotenv;
+use Ramsey\Uuid\Uuid;
 
 require_once __DIR__ . "/../vendor/autoload.php";
 
@@ -27,35 +27,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
 $dotenv = Dotenv::createImmutable(__DIR__ . "/../");
 $dotenv->load();
 
-/*$seeder = new DatabaseSeeder();
-$seeder->run();
-die();*/
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 /*echo "<pre>";
-$productAttributes = (new \App\Services\ProductAttributeService())->findOneById('ps-5');
-$ids = [];
-foreach ($productAttributes as $productAttribute) {
-    $ids[] = $productAttribute['attribute_option_id'];
-}
+/* needed in order line also */
+/* update will be needed after price is calculated
+$orderId = Uuid::uuid4()->toString();
 
-$options = [];
-foreach ($ids as $id) {
-    $options[] = (new \App\Services\AttributeOptionService())->findOneById($id);
-}
-
-$attributes = [];
-foreach ($options as $option) {
-    $test = (new \App\Services\AttributeTypeService())->findOneById($option['attribute_type_id']);
-    if (!in_array($test, $attributes)) {
-        $attributes[] = $test;
-    }
-}
-var_dump($attributes);
-echo "</pre>";
+(new \App\Services\ShopOrderService())->insert($orderId);
+$test = ['productId' => 'apple-airpods-pro', 'orderId' => $orderId, 'quantity' => 12, 'price' => 150];
+(new \App\Services\OrderLineService())->insert($test);
+echo "<pre>";
 die();*/
-
-// todo: remove redundant graphql types
-// todo: update graphql resolvers and method logic in repos
 
 $dispatcher = FastRoute\simpleDispatcher(function (FastRoute\RouteCollector $r) {
     $r->post('/graphql', [GraphQL::class, 'handle']);

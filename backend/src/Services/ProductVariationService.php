@@ -30,6 +30,10 @@ class ProductVariationService implements BaseService
         return $this->getRepository()->findAll();
     }
 
+    public function findAllByProductId($id): array {
+        return $this->getRepository()->findAllByProductId($id);
+    }
+
     public function findOneById($id): array
     {
         return $this->getRepository()->findOneById($id);

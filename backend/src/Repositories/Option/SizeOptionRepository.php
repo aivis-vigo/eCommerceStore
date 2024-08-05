@@ -39,6 +39,17 @@ class SizeOptionRepository extends BaseRepository
             ->fetchAssociative();
     }
 
+    public function findAllByCategoryId(int $category_id): array
+    {
+        return $this->createQueryBuilder()
+            ->select('*')
+            ->from('size_options')
+            ->where('size_category_id = :size_category_id')
+            ->setParameter('size_category_id', $category_id)
+            ->executeQuery()
+            ->fetchAllAssociative();
+    }
+
     public function findOneById(int $sizeId): array
     {
         return $this->createQueryBuilder()

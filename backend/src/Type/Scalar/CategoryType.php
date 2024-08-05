@@ -14,6 +14,12 @@ class CategoryType extends ObjectType
             'name' => 'Category',
             'description' => 'Category for products',
             'fields' => static fn(): array => [
+                'id' => [
+                    'type' => Type::id(),
+                    'resolve' => function ($root) {
+                        return $root['id'];
+                    }
+                ],
                 'product_category_id' => [
                     'type' => Type::int(),
                     'resolve' => function ($root) {

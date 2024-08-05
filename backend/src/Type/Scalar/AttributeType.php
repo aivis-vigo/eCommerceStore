@@ -15,6 +15,12 @@ class AttributeType extends ObjectType
             'name' => 'AttributeType',
             'description' => 'Type of attribute',
             'fields' => static fn(): array => [
+                'id' => [
+                    'type' => Type::id(),
+                    'resolve' => function ($root) {
+                        return $root['id'];
+                    }
+                ],
                 'attribute_type_id' => [
                     'type' => Type::int(),
                     'resolve' => function ($root) {

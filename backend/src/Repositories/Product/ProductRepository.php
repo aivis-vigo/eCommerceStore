@@ -22,6 +22,7 @@ class ProductRepository extends BaseRepository
             ->fetchAllAssociative();
     }
 
+    /* todo: rename to findOneByProductId */
     public function findOneById(string $product_id): array
     {
         return $this->createQueryBuilder()
@@ -31,6 +32,16 @@ class ProductRepository extends BaseRepository
             ->setParameter('product_id', $product_id)
             ->executeQuery()
             ->fetchAssociative();
+    }
+
+    public function findProductCategory(int $product_category_id): string {
+        return $this->createQueryBuilder()
+            ->select('category_name')
+            ->from('product_category')
+            ->where('product_category_id = :product_category_id')
+            ->setParameter('product_category_id', $product_category_id)
+            ->executeQuery()
+            ->fetchOne();
     }
 
     public function findAllByCategoryId(int $product_category_id): array {

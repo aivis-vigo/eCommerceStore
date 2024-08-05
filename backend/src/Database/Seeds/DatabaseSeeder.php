@@ -9,10 +9,8 @@ use App\Services\AttributeOptionService;
 use App\Services\AttributeTypeService;
 use App\Services\BrandService;
 use App\Services\CategoryService;
-use App\Services\ColorService;
 use App\Services\ImageService;
 use App\Services\ProductAttributeService;
-use App\Services\ProductItemService;
 use App\Services\ProductService;
 use App\Services\ProductVariationService;
 use App\Services\SizeCategoryService;
@@ -29,10 +27,8 @@ class DatabaseSeeder
         $sizeOption,
         $brand,
         $product,
-        $productItem,
         $image,
         $productVariation,
-        $color,
         $attributeType,
         $attributeOption,
         $productAttribute;
@@ -50,10 +46,8 @@ class DatabaseSeeder
         $this->sizeOption = new SizeOptionService();
         $this->brand = new BrandService();
         $this->product = new ProductService();
-        $this->productItem = new ProductItemService();
         $this->image = new ImageService();
         $this->productVariation = new ProductVariationService();
-        $this->color = new ColorService();
         $this->attributeType = new AttributeTypeService();
         $this->attributeOption = new AttributeOptionService();
         $this->productAttribute = new ProductAttributeService();
@@ -64,7 +58,7 @@ class DatabaseSeeder
     public function run(): void
     {
 
-        //$this->insertCategories($this->sections);
+        $this->insertCategories($this->sections);
         $this->insertFashionItems($this->clothing);
         $this->insertElectronics($this->devices);
     }

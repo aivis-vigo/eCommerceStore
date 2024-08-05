@@ -52,6 +52,7 @@ class AttributeOptionRepository extends BaseRepository
 
                 foreach ($options as $option) {
                     $value = $option->getValue();
+                    $displayValue = $option->getDisplayValue();
 
                     if (!$this->checkIfExists($typeId, $value)) {
                         $optionId = $this->getAttributeOptionId();
@@ -62,12 +63,14 @@ class AttributeOptionRepository extends BaseRepository
                             ->values([
                                 'attribute_option_id' => ':attribute_option_id',
                                 'attribute_type_id' => ':attribute_type_id',
-                                'attribute_option_value' => ':attribute_option_value'
+                                'attribute_option_value' => ':attribute_option_value',
+                                'display_value' => ':display_value',
                             ])
                             ->setParameters([
                                 'attribute_option_id' => $optionId,
                                 'attribute_type_id' => $typeId,
-                                'attribute_option_value' => $value
+                                'attribute_option_value' => $value,
+                                'display_value' => $displayValue,
                             ])
                             ->executeStatement();
                     }
