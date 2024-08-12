@@ -5,8 +5,6 @@ namespace App\Repositories\Product;
 use App\Interfaces\Product;
 use App\Repositories\BaseRepository;
 
-// todo: read and write repos
-
 class ProductVariationRepository extends BaseRepository
 {
     public function __construct()

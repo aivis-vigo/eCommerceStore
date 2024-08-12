@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\Order\OrderLineRepository;
+use App\Repositories\Brand\Order\OrderLineRepository;
 
 class OrderLineService {
     protected $orderLineRepository;

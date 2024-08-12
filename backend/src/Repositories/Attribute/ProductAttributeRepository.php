@@ -4,6 +4,8 @@ namespace App\Repositories\Attribute;
 
 use App\Interfaces\Product;
 use App\Repositories\BaseRepository;
+use App\Utils\ClassUtils;
+use GraphQL\Utils\Utils;
 
 class ProductAttributeRepository extends BaseRepository
 {
@@ -21,7 +23,6 @@ class ProductAttributeRepository extends BaseRepository
             ->fetchAssociative();
     }
 
-    // todo: should be name findAllById
     public function findOneById(string $product_id): array
     {
         return $this->createQueryBuilder()
@@ -40,7 +41,7 @@ class ProductAttributeRepository extends BaseRepository
         $productId = $this->getProductId($productName);
 
         foreach ($attributes as $attribute) {
-            $className = $this->getClassName($attribute);
+            $className = ClassUtils::getClassName($attribute);
             $attributeTypeId = $this->getAttributeTypeId($className);
             $options = $attribute->getOptions();
 
@@ -98,12 +99,5 @@ class ProductAttributeRepository extends BaseRepository
             ])
             ->executeQuery()
             ->fetchOne();
-    }
-
-    // todo: Util function?
-    public function getClassName(object $properties): string
-    {
-        $fullClassName = get_class($properties);
-        return basename(str_replace('\\', '/', $fullClassName));
     }
 }

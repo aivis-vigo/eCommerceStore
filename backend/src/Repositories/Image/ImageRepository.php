@@ -39,7 +39,6 @@ class ImageRepository extends BaseRepository
             ->fetchAssociative();
     }
 
-    // todo: named findAllById
     public function findOneById(string $product_id): array
     {
         return $this->createQueryBuilder()

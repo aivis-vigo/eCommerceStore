@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\Order\OrderStatusRepository;
+use App\Repositories\Brand\Order\OrderStatusRepository;
 
 class OrderStatusService {
     protected OrderStatusRepository $orderStatusRepository;

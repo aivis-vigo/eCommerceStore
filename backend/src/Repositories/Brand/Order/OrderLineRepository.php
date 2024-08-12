@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Repositories\Order;
+namespace App\Repositories\Brand\Order;
 
 use App\Repositories\BaseRepository;
 
@@ -19,7 +19,6 @@ class OrderLineRepository extends BaseRepository {
                 'price' => ':price',
             ])
             ->setParameters([
-                /* todo: might change this back to just id */
                 'product_id' => $order['original_id'],
                 'order_id' => $order['order_id'],
                 'quantity' => $order['quantity'],

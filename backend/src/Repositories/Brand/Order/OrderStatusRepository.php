@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Repositories\Order;
+namespace App\Repositories\Brand\Order;
 
 use App\Repositories\BaseRepository;
 

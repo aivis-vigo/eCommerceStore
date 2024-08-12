@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Repositories\Order\ShopOrderRepository;
+use App\Repositories\Brand\Order\ShopOrderRepository;
 
 class ShopOrderService {
     protected $shopOrderRepository;

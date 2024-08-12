@@ -27,7 +27,6 @@ class TechProductFactory extends Creator
         return new Device($properties);
     }
 
-    // todo: colors should go through here
     public function getAllAttributes(object $properties): array
     {
         $allAttributes = [];

@@ -4,8 +4,8 @@ namespace App\Repositories\Product;
 
 use App\Interfaces\Product;
 use App\Repositories\BaseRepository;
+use App\Utils\ClassUtils;
 
-// todo: make exception for Product not found
 class ProductRepository extends BaseRepository
 {
     public function __construct()
@@ -22,7 +22,6 @@ class ProductRepository extends BaseRepository
             ->fetchAllAssociative();
     }
 
-    /* todo: rename to findOneByProductId */
     public function findOneById(string $product_id): array
     {
         return $this->createQueryBuilder()
@@ -64,7 +63,7 @@ class ProductRepository extends BaseRepository
             $description = $properties->getDescription();
             $inStock = $properties->isAvailable() ? 1 : 0;
             $originalPrice = $properties->getPrice()->getAmount();
-            $formattedPrice = $this->formatPrice($originalPrice);
+            $formattedPrice = ClassUtils::formatPrice($originalPrice);
 
             $this->createQueryBuilder()
                 ->insert('product')
@@ -128,11 +127,5 @@ class ProductRepository extends BaseRepository
             ->setParameter('brand_name', $brandName)
             ->executeQuery()
             ->fetchOne();
-    }
-
-    // todo: Utils functions?
-    public function formatPrice(float $price): int
-    {
-        return (int)($price * 100);
     }
 }
