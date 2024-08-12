@@ -20,8 +20,8 @@ class OrderLineRepository extends BaseRepository {
             ])
             ->setParameters([
                 /* todo: might change this back to just id */
-                'product_id' => $order['productId'],
-                'order_id' => $order['orderId'],
+                'product_id' => $order['original_id'],
+                'order_id' => $order['order_id'],
                 'quantity' => $order['quantity'],
                 'price' => $order['price'],
             ])

@@ -10,13 +10,16 @@ export default {
         sans: ['Roboto', 'sans-serif'],
       },
       margin: {
-        'cart-top': '3.1rem',
+        'cart-top': '3.45rem',
       },
       padding: {
         'navigation-bottom': '30px',
       },
       height: {
         'carousel': '30rem',
+      },
+      width: {
+        '88': '22rem',
       }
     },
   },

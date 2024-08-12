@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
-import { NavigationContext } from '../context/NavigationContext.tsx';
+import {NavigationContext} from "../context/NavigationContext.tsx";
 
 const DefaultCategoryRedirect: React.FC = () => {
     const navigationContext = useContext(NavigationContext);

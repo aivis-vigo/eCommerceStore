@@ -1,30 +1,66 @@
-import {createContext, useEffect, useState} from 'react';
+import { createContext, FC, ReactNode, useEffect, useState } from 'react';
 import generateItemId from "../utilities/generateItemId.ts";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { PLACE_ORDER } from "../graphql/mutations.ts";
 
-export const CartContext = createContext();
+interface AttributeOption {
+    attribute_option_value: string;
+    display_value: string;
+    size_code?: string;
+}
 
-/* todo: cart is emptied after order is placed */
-/* todo: cart has a disabled and greyed out button when it's empty */
-/* todo: product_id needs to stay the same for it to be connected with products table (problem started in a place when product names was used to generate ids with selected attributes) */
-/* todo: pass cleaned cart items array to mutation so there wouldn't be side effects */
+interface Attribute {
+    attribute_name: string;
+    attribute_options: AttributeOption[];
+}
 
-const CartProvider = ({children}) => {
-    const storedItems = JSON.parse(localStorage.getItem("shopping-cart")) || [];
-    const [items, setItems] = useState(storedItems);
-    const [totalPrice, setTotalPrice] = useState(0);
+interface SelectedAttributes {
+    [attributeName: string]: string;
+}
+
+export interface Product {
+    product_id: string;
+    original_id: string;
+    name: string;
+    attributes: Attribute[];
+    selectedAttributes: SelectedAttributes;
+    price: number;
+    image_url: string;
+    quantity: number;
+}
+
+export interface CartContextType {
+    items: Product[];
+    totalPrice: number;
+    isCartOpen: boolean;
+    setIsCartOpen: React.Dispatch<React.SetStateAction<boolean>>;
+    addItemToCart: (newItem: Product) => void;
+    updateItemQuantity: (id: string, quantity: number) => void;
+    updateSelectedOption: (productId: string, original_id: string, attributes: any) => void;
+    toggleCart: () => void;
+    placeOrder: () => void;
+}
+
+export const CartContext = createContext<CartContextType | undefined>(undefined);
+
+interface CartProviderProps {
+    children: ReactNode;
+}
+
+const CartProvider: FC<CartProviderProps> = ({ children }) => {
+    const storedItems = localStorage.getItem("shopping-cart");
+    const parsedItems = storedItems ? JSON.parse(storedItems) : [];
+    const [items, setItems] = useState<Product[]>(parsedItems);
     const [isCartOpen, setIsCartOpen] = useState(false);
-
-    //localStorage.clear();
 
     useEffect(() => {
         localStorage.setItem("shopping-cart", JSON.stringify(items));
     }, [items]);
 
-    const addItemToCart = (newItem) => {
+    const addItemToCart = (newItem: Product) => {
         setItems(prevItems => {
-            const existingItemIndex = prevItems.findIndex(item => item.id === newItem.id);
+            const existingItemIndex = prevItems.findIndex(item => item.product_id === newItem.product_id);
 
-            // -1 is returned if no match is found
             const updatedItems = existingItemIndex >= 0
                 ? prevItems.map((item, index) =>
                     index === existingItemIndex
@@ -33,7 +69,6 @@ const CartProvider = ({children}) => {
                 )
                 : [...prevItems, newItem];
 
-            // Open the cart overlay after adding the item
             setIsCartOpen(true);
 
             return updatedItems;
@@ -41,30 +76,29 @@ const CartProvider = ({children}) => {
     };
 
     const updateItemQuantity = (id: string, quantity: number) => {
-        setItems(prevItems =>
-            prevItems.map(item =>
-                item.id === id ? {...item, quantity} : item
-            )
-        );
+        setItems(prevItems => {
+            return prevItems.map(item =>
+                item.product_id === id ? { ...item, quantity } : item
+            ).filter(item => item.quantity > 0);
+        });
     };
 
-    const updateSelectedOption = (productId, name, attributes) => {
-        const newId = generateItemId(name, attributes);
+    const updateSelectedOption = (productId: string, original_id: string, attributes: SelectedAttributes) => {
+        const newId = generateItemId(original_id, attributes);
 
         setItems(prevItems => {
-            const updatedItems = [];
+            const updatedItems: Product[] = [];
 
-            // Helper function to check if an item with the same attributes already exists
-            const findExistingItemIndex = (item) => {
+            const findExistingItemIndex = (item: Product) => {
                 return updatedItems.findIndex(updatedItem =>
-                    updatedItem.id === newId &&
+                    updatedItem.product_id === newId &&
                     JSON.stringify(updatedItem.selectedAttributes) === JSON.stringify(item.selectedAttributes)
                 );
             };
 
             prevItems.forEach(item => {
-                if (item.id === productId) {
-                    const updatedItem = { ...item, id: newId, selectedAttributes: attributes };
+                if (item.product_id === productId) {
+                    const updatedItem = { ...item, product_id: newId, selectedAttributes: attributes };
 
                     const existingItemIndex = findExistingItemIndex(item);
 
@@ -91,6 +125,30 @@ const CartProvider = ({children}) => {
         setIsCartOpen(prevState => !prevState);
     };
 
+    const placeOrder = async () => {
+        const cartItems = items.map(({ original_id, quantity, price }) => ({ original_id, quantity, price }));
+
+        try {
+            const client = new ApolloClient({
+                uri: 'http://minimalistmall.com/api/src/Controllers/GraphQL.php',
+                cache: new InMemoryCache()
+            });
+            const response = await client.mutate({
+                mutation: PLACE_ORDER,
+                variables: { items: cartItems }
+            });
+
+            console.log(response.data);
+        } catch (error) {
+            console.error('Error placing order:', error);
+        }
+
+        setItems([]);
+        localStorage.removeItem("shopping-cart");
+    }
+
+    const totalPrice = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+
     return (
         <CartContext.Provider value={{
             items,
@@ -101,6 +159,7 @@ const CartProvider = ({children}) => {
             updateItemQuantity,
             updateSelectedOption,
             toggleCart,
+            placeOrder
         }}>
             {children}
         </CartContext.Provider>

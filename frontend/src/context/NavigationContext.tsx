@@ -1,10 +1,14 @@
-import { createContext, useState, useEffect } from 'react';
+import {createContext, useState, useEffect, ReactNode, FC} from 'react';
 import { useQuery } from '@apollo/client';
-import {GET_ALL_CATEGORIES} from "../../queries.ts";
+import {GET_ALL_CATEGORIES} from "../graphql/queries.ts";
 
-export const NavigationContext = createContext();
+interface NavigationContextType {
+    defaultCategory: string;
+}
 
-const NavigationProvider = ({ children }) => {
+export const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
+
+const NavigationProvider: FC<{ children: ReactNode }> = ({ children }) => {
     const { data, loading, error } = useQuery(GET_ALL_CATEGORIES);
     const [defaultCategory, setDefaultCategory] = useState('');
 

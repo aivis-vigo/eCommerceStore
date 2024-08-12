@@ -5,6 +5,13 @@ import './index.css'
 import {ApolloClient, ApolloProvider, InMemoryCache} from "@apollo/client";
 import CartProvider from "./context/CartContext.tsx";
 
+/* prod env */
+/*const client = new ApolloClient({
+    uri: 'http://minimalistmall.com/api/graphql',
+    cache: new InMemoryCache()
+});*/
+
+/* local env */
 const client = new ApolloClient({
     uri: 'http://localhost:8080/graphql',
     cache: new InMemoryCache()

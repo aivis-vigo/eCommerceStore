@@ -105,7 +105,7 @@ class ProductType extends ObjectType
                 'size_options' => [
                     'type' => Type::listOf(TypeRegistry::type(SizeOptionType::class)),
                     'resolve' => function ($root) {
-                        if ($root['product_category_id'] === 2) {
+                        if ($root['product_category_id'] === 1) {
                             if ($root['product_id'] == 'huarache-x-stussy-le') {
                                 return (new SizeOptionService())->findAllByCategoryId(1);
                             }

@@ -1,11 +1,12 @@
-import {useParams} from "react-router-dom";
-import Products from "../products/Products.tsx";
+import { useParams } from 'react-router-dom';
+import Products from '../products/Products';
 
-// CategoryWrapper component to use URL params
 const CategoryWrapper = () => {
-    const { category } = useParams();
+    const { category } = useParams<{ category?: string }>();
 
-    return <Products category={category} />;
+    const categoryName = category || '';
+
+    return <Products category={categoryName} />;
 };
 
 export default CategoryWrapper;

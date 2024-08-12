@@ -78,8 +78,8 @@ class NodeType extends InterfaceType
             return TypeRegistry::type(SizeOptionType::class);
         }
 
-        if ($object instanceof CartItemType) {
-            return TypeRegistry::type(CartItemType::class);
+        if ($object instanceof OrderItemInputType) {
+            return TypeRegistry::type(OrderItemInputType::class);
         }
 
         $notNode = Utils::printSafe($object);

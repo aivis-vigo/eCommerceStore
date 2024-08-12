@@ -1,16 +1,52 @@
-import {Component} from 'react';
-import ProductCard from "./ProductCard.js";
-import PropTypes from "prop-types";
+import { Component } from 'react';
+import PropTypes from 'prop-types';
+import ProductCard from './ProductCard';
 
-class ProductList extends Component {
+interface AttributeOption {
+    attribute_option_value: string;
+    display_value: string;
+    size_code?: string;
+}
+
+interface Attribute {
+    attribute_name: string;
+    attribute_options: AttributeOption[];
+}
+
+interface Product {
+    product_id: string;
+    name: string;
+    attributes: Attribute[];
+    size_options: AttributeOption[];
+    images: { image_url: string }[];
+    original_price: number;
+    in_stock: number;
+}
+
+interface ProductListProps {
+    category: string;
+    products: Product[];
+}
+
+class ProductList extends Component<ProductListProps> {
     static propTypes = {
         category: PropTypes.string.isRequired,
-        products: PropTypes.array.isRequired,
+        products: PropTypes.arrayOf(PropTypes.shape({
+            product_id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
+            attributes: PropTypes.array.isRequired,
+            size_options: PropTypes.array.isRequired,
+            images: PropTypes.arrayOf(PropTypes.shape({
+                image_url: PropTypes.string.isRequired,
+            })).isRequired,
+            original_price: PropTypes.number.isRequired,
+            in_stock: PropTypes.number.isRequired,
+        })).isRequired,
     }
 
     render() {
         return (
-            <div className="container mx-auto grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 pt-6 gap-8">
+            <div className="container mx-auto grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16 justify-items-center">
                 {this.props.products.map((product, index) => (
                     <ProductCard
                         key={index}
@@ -25,7 +61,7 @@ class ProductList extends Component {
                     />
                 ))}
             </div>
-        )
+        );
     }
 }
 

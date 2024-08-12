@@ -1,4 +1,11 @@
-export default function generateItemId(name: string, attributes) {
+interface Attribute {
+    attribute_name: string;
+    attribute_options: {
+        attribute_option_value: string;
+    }[];
+}
+
+export default function generateItemId(name: string, attributes: Attribute[] | Record<string, string>) {
     // Convert the item name to a lowercase hyphenated format
     const formattedName = name.toLowerCase().replace(/\s+/g, '-');
 
@@ -9,7 +16,7 @@ export default function generateItemId(name: string, attributes) {
             const value = attribute.attribute_options[0].attribute_option_value.toLowerCase();
             acc[key] = value;
             return acc;
-        }, {});
+        }, {} as Record<string, string>);
 
         const properties = Object.entries(result);
 
@@ -32,7 +39,7 @@ export default function generateItemId(name: string, attributes) {
         const result = Object.entries(attributes).reduce((acc, [key, value]) => {
             acc[key.toLowerCase()] = value.toLowerCase();
             return acc;
-        }, {});
+        }, {} as Record<string, string>);
 
         const properties = Object.entries(result);
         const formattedString = properties

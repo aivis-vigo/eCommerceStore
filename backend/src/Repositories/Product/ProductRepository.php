@@ -109,6 +109,7 @@ class ProductRepository extends BaseRepository
 
     public function getProductCategoryId(string $category): int
     {
+        var_dump($category);
         return $this->createQueryBuilder()
             ->select('product_category_id')
             ->from('product_category')

@@ -5,7 +5,6 @@ import DefaultCategoryRedirect from './components/DefaultCategoryRedirect';
 import NavigationBarWrapper from './components/wrappers/NavigationWrapper.tsx';
 import CategoryWrapper from './components/wrappers/CategoryWrapper.tsx';
 import ProductWrapper from './components/wrappers/ProductWrapper.tsx';
-import ErrorPage from '../error-page.tsx';
 
 class App extends React.Component {
     render() {
@@ -17,7 +16,6 @@ class App extends React.Component {
                         <Route path="/" element={<DefaultCategoryRedirect />} />
                         <Route path="/:category" element={<CategoryWrapper />} />
                         <Route path="/:cat_name/:productId" element={<ProductWrapper />} />
-                        <Route path="*" element={<ErrorPage />} />
                     </Routes>
                 </NavigationProvider>
             </Router>

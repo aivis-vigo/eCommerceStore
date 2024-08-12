@@ -93,6 +93,7 @@ class DatabaseSeeder
             }
             $brandName = $wearable->getBrand();
             $this->brand->insertOne($brandName);
+
             $this->product->insertOne($wearable);
             foreach ($wearable->getImages() as $image) {
                 $this->image->insertOne([

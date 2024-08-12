@@ -6,12 +6,11 @@ use App\Services\CategoryService;
 use App\Services\OrderLineService;
 use App\Services\ProductService;
 use App\Services\ShopOrderService;
-use App\Type\Scalar\CartItemType;
 use App\Type\Scalar\CategoryType;
+use App\Type\Scalar\OrderItemInputType;
 use App\Type\Scalar\ProductType;
 use App\Type\TypeRegistry;
 use GraphQL\GraphQL as GraphQLBase;
-use GraphQL\Type\Definition\ListOfType;
 use GraphQL\Type\Definition\NonNull;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -67,10 +66,17 @@ class GraphQL
                 'name' => 'Mutation',
                 'fields' => [
                     'placeOrder' => [
-                        'type' => Type::nonNull(Type::string()),
+                        'type' => new ObjectType([
+                            'name' => 'PlaceOrderResponse',
+                            'fields' => [
+                                'success' => Type::nonNull(Type::boolean()),
+                                'message' => Type::string(),
+                                'orderId' => Type::string(),
+                            ],
+                        ]),
                         'args' => [
                             'items' => [
-                                'type' => Type::nonNull(Type::listOf(TypeRegistry::type(CartItemType::class)))
+                                'type' => Type::nonNull(Type::listOf(TypeRegistry::type(OrderItemInputType::class))),
                             ],
                         ],
                         'resolve' => function ($root, array $args) {
@@ -83,7 +89,7 @@ class GraphQL
                                 foreach ($args['items'] as $item) {
                                     error_log('Processing item: ' . print_r($item, true));
                                     // Validate and calculate
-                                    if (!isset($item['productId'], $item['quantity'], $item['price'])) {
+                                    if (!isset($item['original_id'], $item['quantity'], $item['price'])) {
                                         throw new \Exception('Invalid item data');
                                     }
                                     $total += $item['quantity'] * $item['price'];
@@ -98,18 +104,20 @@ class GraphQL
                                 // Insert order lines
                                 $orderLineService = new OrderLineService();
                                 foreach ($args['items'] as $item) {
-                                    $item['orderId'] = $orderId;
-                                    var_dump($item);
+                                    $item['order_id'] = $orderId;
                                     $orderLineService->insert($item);
                                 }
 
-                                return $orderId;
+                                return [
+                                    'success' => true,
+                                    'message' => 'Order placed successfully',
+                                    'orderId' => $orderId,
+                                ];
                             } catch (Throwable $e) {
                                 error_log('Error in placeOrder: ' . $e->getMessage());
                                 throw $e; // Rethrow to be captured by GraphQL
                             }
                         },
-
                     ],
                 ],
             ]);

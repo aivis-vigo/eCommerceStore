@@ -1,37 +1,50 @@
-import PropTypes from "prop-types";
-import formatCurrency from "../../utilities/formatCurrency";
 import { Component } from "react";
-import toKebabCase from "../../utilities/toKebabCase.ts";
-import { CartContext } from "../../context/CartContext.tsx";
+import formatCurrency from "../../utilities/formatCurrency";
+import toKebabCase from "../../utilities/toKebabCase";
+import { CartContext } from "../../context/CartContext";
 
-class CartItem extends Component {
+interface AttributeOption {
+    attribute_option_value: string;
+    display_value: string;
+    size_code?: string;
+}
+
+interface Attribute {
+    attribute_name: string;
+    attribute_options: AttributeOption[];
+}
+
+interface CartItemProps {
+    product_id: string;
+    original_id: string;
+    name: string;
+    attributes: Attribute[];
+    selectedAttributes: Record<string, string>;
+    price: number;
+    image_url: string;
+    quantity: number;
+}
+
+interface CartItemState {
+    quantity: number;
+    current_price: number;
+    selectedOptions: Record<string, string>;
+}
+
+class CartItem extends Component<CartItemProps, CartItemState> {
     static contextType = CartContext;
 
-    static propTypes = {
-        id: PropTypes.string.isRequired,
-        name: PropTypes.string.isRequired,
-        attributes: PropTypes.array.isRequired,
-        selectedAttributes: PropTypes.object.isRequired,
-        price: PropTypes.number.isRequired,
-        image_url: PropTypes.string.isRequired,
-        quantity: PropTypes.number.isRequired,
-    };
-
-    constructor(props) {
+    constructor(props: CartItemProps) {
         super(props);
 
         this.state = {
             quantity: props.quantity,
             current_price: props.quantity * props.price,
-            selectedOptions: { ...this.props.selectedAttributes },
+            selectedOptions: { ...props.selectedAttributes },
         };
-
-        this.addOne = this.addOne.bind(this);
-        this.removeOne = this.removeOne.bind(this);
-        this.handleSelectOption = this.handleSelectOption.bind(this);
     }
 
-    static getDerivedStateFromProps(nextProps, prevState) {
+    static getDerivedStateFromProps(nextProps: CartItemProps, prevState: CartItemState) {
         if (nextProps.quantity !== prevState.quantity) {
             return {
                 quantity: nextProps.quantity,
@@ -41,23 +54,23 @@ class CartItem extends Component {
         return null;
     }
 
-    addOne() {
-        const { updateItemQuantity } = this.context;
+    addOne = () => {
+        const { updateItemQuantity } = this.context as any;
         const quantity = this.state.quantity + 1;
-        updateItemQuantity(this.props.id, quantity);
+        updateItemQuantity(this.props.product_id, quantity);
     }
 
-    removeOne() {
-        const { updateItemQuantity } = this.context;
+    removeOne = () => {
+        const { updateItemQuantity } = this.context as any;
         const quantity = this.state.quantity - 1;
 
         if (quantity > -1) {
-            updateItemQuantity(this.props.id, quantity);
+            updateItemQuantity(this.props.product_id, quantity);
         }
     }
 
-    handleSelectOption(attributeName, optionValue) {
-        const { updateSelectedOption } = this.context;
+    handleSelectOption = (attributeName: string, optionValue: string) => {
+        const { updateSelectedOption } = this.context as any;
 
         this.setState((prevState) => {
             const newSelectedOptions = {
@@ -66,8 +79,8 @@ class CartItem extends Component {
             };
 
             updateSelectedOption(
-                this.props.id,
-                this.props.name,
+                this.props.product_id,
+                this.props.original_id,
                 newSelectedOptions
             );
 
@@ -82,80 +95,76 @@ class CartItem extends Component {
             <div className="block px-4 py-2">
                 <div className="flex flex-row justify-between w-full">
                     <div className="flex flex-col justify-between w-2/3 max-w-md">
-                        <p className="text-gray-500">{this.props.name}</p>
-                        <p>{formatCurrency(this.state.current_price)}</p>
+                        <p className="font-light mt-1">{this.props.name}</p>
+                        <p className={`${Object.keys(this.props.selectedAttributes).length === 0 ? '' : 'py-2'}`}>{formatCurrency(this.state.current_price)}</p>
                         {this.props.attributes.length > 0 &&
                             this.props.attributes.map((attribute, index) => (
-                                <div key={index} className={`flex flex-col ${index !== this.props.attributes.length - 1 ? 'my-2' : ''}`}>
-                                    <p className="text-gray-500 mb-1">
+                                <div key={index} className={`flex flex-col ${index !== this.props.attributes.length - 1 ? 'mb-2' : ''}`}>
+                                    <p className="font-light mb-1">
                                         {attribute.attribute_name.includes("Capacity")
                                             ? "Capacity:"
                                             : attribute.attribute_name + ':'}
                                     </p>
                                     <div
-                                        className="flex flex-row space-x-2 max-w-28"
+                                        className="flex flex-row space-x-2 max-w-28 justify-items-center font-light"
                                         data-testid={`cart-item-attribute-${toKebabCase(
                                             attribute.attribute_name
-                                        )}`}
+                                        ).toLowerCase()}`}
                                     >
                                         {attribute.attribute_name === "Color" ? (
-                                            /* box with colors */
-                                            attribute.attribute_options.map((option, idx) => (
-                                                <div
-                                                    key={idx}
-                                                    onClick={() => {
-                                                        this.handleSelectOption(
-                                                            attribute.attribute_name,
-                                                            option.attribute_option_value
-                                                        );
-                                                    }}
-                                                    style={{
-                                                        backgroundColor: option.attribute_option_value,
-                                                    }}
-                                                    className={`w-4 h-4 cursor-pointer ${
-                                                        this.props.selectedAttributes[
-                                                            attribute.attribute_name
-                                                            ] === option.attribute_option_value
-                                                            ? "border-2 border-green-400"
-                                                            : "border border-gray-300"
-                                                    }`}
-                                                    data-testid={`cart-item-attribute-${toKebabCase(
-                                                        attribute.attribute_name
-                                                    )}-${toKebabCase(option.display_value)}${
-                                                        this.props.selectedAttributes[
-                                                            attribute.attribute_name
-                                                            ] === option.attribute_option_value
-                                                            ? "-selected"
-                                                            : ""
-                                                    }`}
-                                                />
-                                            ))
-                                        ) : (
-                                            /* box with characters */
-                                            attribute.attribute_options.map((option, idx) =>
-                                                option.attribute_option_value !== undefined ? (
+                                            attribute.attribute_options.map((option, idx) => {
+                                                const safeOptionValue = option.attribute_option_value || '';
+                                                return (
                                                     <div
+                                                        key={idx}
+                                                        onClick={() => {
+                                                            this.handleSelectOption(attribute.attribute_name, safeOptionValue);
+                                                        }}
+                                                        data-testid={`cart-item-attribute-${toKebabCase(attribute.attribute_name).toLowerCase()}-${toKebabCase(option.display_value)}${
+                                                            this.state.selectedOptions[attribute.attribute_name] === safeOptionValue ? "-selected" : ""
+                                                        }`}
+                                                        className="inline-block content-center"
+                                                    >
+                                                        {this.state.selectedOptions[attribute.attribute_name] === safeOptionValue ? (
+                                                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <rect x="2" y="2" width="16" height="16" fill={safeOptionValue} />
+                                                                <rect x="0.5" y="0.5" width="19" height="19" stroke="#5ECE7B" />
+                                                            </svg>
+                                                        ) : (
+                                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className="hover:cursor-pointer">
+                                                                <rect width="16" height="16" fill={safeOptionValue} />
+                                                            </svg>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })
+                                        ) : (
+                                            attribute.attribute_options.map((option, idx) => {
+                                                const safeOptionValue = option.attribute_option_value || '';
+                                                const safeSizeCode = option.size_code || '';
+                                                return option.attribute_option_value !== undefined ? (
+                                                    <div
+                                                        data-testid={`cart-item-attribute-${toKebabCase(
+                                                            attribute.attribute_name
+                                                        ).toLowerCase()}-${toKebabCase(option.display_value)}${
+                                                            this.state.selectedOptions[
+                                                                attribute.attribute_name
+                                                                ] === safeOptionValue
+                                                                ? "-selected"
+                                                                : ""
+                                                        }`}
                                                         key={idx}
                                                         onClick={() =>
                                                             this.handleSelectOption(
                                                                 attribute.attribute_name,
-                                                                option.attribute_option_value
+                                                                safeOptionValue
                                                             )
                                                         }
                                                         className={`justify-center cursor-pointer border border-black w-14 h-6 flex items-center justify-center ${
-                                                            this.props.selectedAttributes[
+                                                            this.state.selectedOptions[
                                                                 attribute.attribute_name
-                                                                ] === option.attribute_option_value
+                                                                ] === safeOptionValue
                                                                 ? "bg-black text-white"
-                                                                : ""
-                                                        }`}
-                                                        data-testid={`cart-item-attribute-${toKebabCase(
-                                                            attribute.attribute_name
-                                                        )}-${toKebabCase(option.display_value)}${
-                                                            this.props.selectedAttributes[
-                                                                attribute.attribute_name
-                                                                ] === option.attribute_option_value
-                                                                ? "-selected"
                                                                 : ""
                                                         }`}
                                                     >
@@ -163,34 +172,30 @@ class CartItem extends Component {
                                                     </div>
                                                 ) : (
                                                     <div
+                                                        data-testid={`cart-item-attribute-${toKebabCase(attribute.attribute_name).toLowerCase()}-${toKebabCase(safeSizeCode)}${
+                                                            this.state.selectedOptions[attribute.attribute_name] === safeSizeCode
+                                                                ? "-selected"
+                                                                : ""
+                                                        }`}
                                                         key={idx}
                                                         onClick={() =>
                                                             this.handleSelectOption(
                                                                 attribute.attribute_name,
-                                                                option.size_code
+                                                                safeSizeCode
                                                             )
                                                         }
                                                         className={`justify-center cursor-pointer border border-black w-11 h-6 flex items-center justify-center ${
-                                                            this.props.selectedAttributes[
+                                                            this.state.selectedOptions[
                                                                 attribute.attribute_name
-                                                                ] === option.size_code
+                                                                ] === safeSizeCode
                                                                 ? "bg-black text-white"
                                                                 : ""
                                                         }`}
-                                                        data-testid={`cart-item-attribute-${toKebabCase(
-                                                            attribute.attribute_name
-                                                        )}-${toKebabCase(option.size_code)}${
-                                                            this.props.selectedAttributes[
-                                                                attribute.attribute_name
-                                                                ] === option.size_code
-                                                                ? "-selected"
-                                                                : ""
-                                                        }`}
                                                     >
-                                                        {option.size_code}
+                                                        {safeSizeCode}
                                                     </div>
-                                                )
-                                            )
+                                                );
+                                            })
                                         )}
                                     </div>
                                 </div>
@@ -199,33 +204,24 @@ class CartItem extends Component {
 
                     <div className="flex flex-col justify-between items-center mr-2">
                         <button onClick={this.addOne} data-testid="cart-item-amount-increase">
-                            <svg
-                                className="h-5 w-5"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <line x1="12" y1="8" x2="12" y2="16" />
-                                <line x1="8" y1="12" x2="16" y2="12" />
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g clip-path="url(#clip0_92234_46)">
+                                    <path d="M12 8V16" stroke="#1D1F22" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <path d="M8 12H16" stroke="#1D1F22" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <rect x="0.5" y="0.5" width="23" height="23" stroke="#1D1F22"/>
+                                </g>
+                                <defs>
+                                    <clipPath id="clip0_92234_46">
+                                        <rect width="24" height="24" fill="white"/>
+                                    </clipPath>
+                                </defs>
                             </svg>
                         </button>
                         <p id="item-count">{this.state.quantity}</p>
                         <button onClick={this.removeOne} data-testid="cart-item-amount-decrease">
-                            <svg
-                                className="h-5 w-5"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                            >
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                                <line x1="8" y1="12" x2="16" y2="12" />
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="0.5" y="0.5" width="23" height="23" stroke="#1D1F22"/>
+                                <path d="M8 12H16" stroke="#1D1F22" stroke-linecap="round" stroke-linejoin="round"/>
                             </svg>
                         </button>
                     </div>
@@ -234,7 +230,7 @@ class CartItem extends Component {
                         <img
                             src={this.props.image_url}
                             alt={this.props.name}
-                            className="h-28 w-auto"
+                            className="object-cover"
                         />
                     </div>
                 </div>

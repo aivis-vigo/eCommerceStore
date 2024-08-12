@@ -1,20 +1,24 @@
-import {Component} from 'react';
-import PropTypes from 'prop-types';
+import { Component } from 'react';
 
-class ImageCarousel extends Component {
-    static propTypes = {
-        imageUrls: PropTypes.array.isRequired,
-    };
+interface Image {
+    image_url: string;
+}
 
-    constructor(props) {
+interface ImageCarouselProps {
+    imageUrls: Image[];
+}
+
+interface ImageCarouselState {
+    imageIndex: number;
+}
+
+class ImageCarousel extends Component<ImageCarouselProps, ImageCarouselState> {
+    constructor(props: ImageCarouselProps) {
         super(props);
 
         this.state = {
             imageIndex: 0,
         };
-
-        this.handlePrevClick = this.handlePrevClick.bind(this);
-        this.handleNextClick = this.handleNextClick.bind(this);
     }
 
     handlePrevClick = () => {
@@ -30,24 +34,23 @@ class ImageCarousel extends Component {
     };
 
     render() {
-        const {imageUrls} = this.props;
-        const {imageIndex} = this.state;
+        const { imageUrls } = this.props;
+        const { imageIndex } = this.state;
 
-        // Filter out the main image from the thumbnails
         const thumbnailImages = imageUrls.filter((_, index) => index !== imageIndex);
 
         return (
-            <div className="flex items-start justify-between gap-x-2 h-carousel" data-testid='product-gallery'>
+            <div className="flex items-start justify-between gap-x-2 h-carousel" data-testid="product-gallery">
                 {/* smaller images column */}
                 {thumbnailImages.length > 0 && (
                     <div className="flex flex-col space-y-2 w-1/4 h-full overflow-y-auto max-h-screen gap-y-2">
                         {thumbnailImages.map((image, index) => (
                             <img
                                 key={index}
-                                className="w-full h-1/4 object-contain cursor-pointer"
+                                className="w-full h-24 object-contain cursor-pointer"
                                 alt={`thumbnail-${index}`}
                                 src={image.image_url}
-                                onClick={() => this.setState({imageIndex: imageUrls.indexOf(image)})}
+                                onClick={() => this.setState({ imageIndex: imageUrls.indexOf(image) })}
                             />
                         ))}
                     </div>
