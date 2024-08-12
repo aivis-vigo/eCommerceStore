@@ -35,7 +35,7 @@ MinimalistMall leverages a combination of modern technologies to provide a seaml
 
 ## Getting Started
 
-1. **Visit MinimalistMall**: Open our website and start exploring our product offerings.
+1. **Visit MinimalistMall**: [Open our website](https://www.minimalistmall.com) to start exploring our product offerings.
 2. **Add Items to Cart**: Select and add your desired items to your cart.
 3. **Review Your Cart**: Check your cart to ensure everything is correct.
 4. **Place Your Order**: Proceed to checkout to complete your purchase.
